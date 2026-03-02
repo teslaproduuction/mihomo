@@ -618,6 +618,49 @@ func ConvertsV2Ray(buf []byte) ([]map[string]any, error) {
 			anytls["udp"] = true
 
 			proxies = append(proxies, anytls)
+
+		case "mieru":
+			urlMieru, err := url.Parse(line)
+			if err != nil {
+				continue
+			}
+
+			query := urlMieru.Query()
+			server := urlMieru.Hostname()
+			if server == "" {
+				continue
+			}
+
+			remarks := urlMieru.Fragment
+			if remarks == "" {
+				remarks = server
+			}
+			name := uniqueName(names, remarks)
+
+			mieru := make(map[string]any, 10)
+			mieru["name"] = name
+			mieru["type"] = "mieru"
+			mieru["server"] = server
+			mieru["username"] = urlMieru.User.Username()
+			mieru["password"], _ = urlMieru.User.Password()
+			mieru["transport"] = strings.ToUpper(query.Get("protocol"))
+
+			if port := query.Get("port"); port != "" {
+				if strings.Contains(port, "-") {
+					mieru["port-range"] = port
+				} else {
+					mieru["port"] = port
+				}
+			}
+
+			if multiplexing := query.Get("multiplexing"); multiplexing != "" {
+				mieru["multiplexing"] = multiplexing
+			}
+			if handshakeMode := query.Get("handshake-mode"); handshakeMode != "" {
+				mieru["handshake-mode"] = handshakeMode
+			}
+
+			proxies = append(proxies, mieru)
 		}
 	}
 
