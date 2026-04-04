@@ -619,7 +619,7 @@ func ConvertsV2Ray(buf []byte) ([]map[string]any, error) {
 
 			proxies = append(proxies, anytls)
 
-		case "mierus":
+		case "mierus", "mieru":
 			urlMieru, err := url.Parse(line)
 			if err != nil {
 				continue
